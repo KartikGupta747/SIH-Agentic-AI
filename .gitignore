@@ -1,14 +1,31 @@
-# Python cache files
+# Python
 __pycache__/
 *.py[cod]
 *$py.class
 *.so
+.Python
+env/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
 
 # Virtual Environment
 venv/
 env/
-
-# Environment variables
 .env
 
 # Project-specific data and indices
@@ -17,8 +34,12 @@ index_data/
 # Downloaded Model Weights (CRITICAL to avoid GitHub 100MB limit)
 local_cross_encoder/
 
-# Temporary sandbox execution files
+# Temporary execution and testing files
 sandbox_temp.py
+temp_*.png
+test_*.py
+test_stream.py
+test_astream.py
 
 # Generated output deliverables and test images
 *.docx
@@ -26,7 +47,35 @@ final_approval_note.docx
 Gemini_Generated_Image_*.png
 *.png
 *.jpg
+*.jpeg
+
+# Node/Frontend
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+frontend/dist/
+frontend/build/
+frontend/tmp.*
+frontend/*.tmp
+frontend/tmp.tsx
 
 # OS generated files
 .DS_Store
-Thumbs.db
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+ehthumbs_vista.db
+[Tt]humbs.db
+
+# IDE and Editor files
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
