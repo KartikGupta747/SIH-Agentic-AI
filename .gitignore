@@ -2,20 +2,31 @@
 __pycache__/
 *.py[cod]
 *$py.class
+*.so
 
 # Virtual Environment
 venv/
+env/
+
+# Environment variables
+.env
 
 # Project-specific data and indices
 index_data/
 
+# Downloaded Model Weights (CRITICAL to avoid GitHub 100MB limit)
+local_cross_encoder/
+
 # Temporary sandbox execution files
 sandbox_temp.py
 
-# Generated output deliverables
+# Generated output deliverables and test images
 *.docx
 final_approval_note.docx
+Gemini_Generated_Image_*.png
+*.png
+*.jpg
 
-# OS generated files (Optional but recommended)
+# OS generated files
 .DS_Store
 Thumbs.db

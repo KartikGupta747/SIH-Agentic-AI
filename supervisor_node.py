@@ -10,26 +10,30 @@ class SubAgentPlan(BaseModel):
         description="The sequence of tools/sub-agents required to fulfill the request."
     )
 
+SYSTEM_PROMPT = """You are the Routing Supervisor for MRPL. You MUST map the user's query to a list of tools.
+
+AVAILABLE TOOLS: "vision", "rag", "coder", "deliverable"
+
+STRICT KEYWORD RULES:
+- If the query contains ["image", "scan", "P&ID", "photo", "extract"], YOU MUST output "vision".
+- If the query contains ["standards", "API", "SOP", "search", "check", "policy"], YOU MUST output "rag".
+- If the query contains ["calculate", "life", "thickness", "formula", "math"], YOU MUST output "coder".
+- If the query contains ["note", "report", "document", "generate", "Word"], YOU MUST output "deliverable".
+
+You can select multiple tools. If you do, order them EXACTLY as: ["vision", "rag", "coder", "deliverable"].
+
+EXAMPLE:
+Query: "Extract from scan, search standards to calculate life, generate note."
+Output: {{"reasoning": "scan=vision, standards=rag, calculate=coder, note=deliverable", "active_plan": ["vision", "rag", "coder", "deliverable"]}}
+"""
+
 def get_supervisor_chain():
     # keep_alive=0 flushes the model from VRAM immediately after use
     llm = ChatOllama(model="qwen2.5:3b", temperature=0.0, keep_alive=0)
     structured_llm = llm.with_structured_output(SubAgentPlan)
     
     prompt = ChatPromptTemplate.from_messages([
-        ("system", """You are the Elite Supervisor Agent. Your job is to analyze the user's query and determine which sub-agents are needed to fulfill the request.
-You must output a reasoning string and a list of active_plan tools. 
-The available tools are exactly: "vision", "rag", "coder", "deliverable".
-
-Here are two examples demonstrating how to map queries to the exact literal tool names:
-
-Example 1:
-User Query: "Read the invoice from invoice.png and save the total to a file."
-Output: {{"reasoning": "Need to extract text from an image, then write code to save it.", "active_plan": ["vision", "coder", "deliverable"]}}
-
-Example 2:
-User Query: "Find our company policy on remote work and write a python script to email it to new hires."
-Output: {{"reasoning": "Need to search documents for the policy, then write a script.", "active_plan": ["rag", "coder", "deliverable"]}}
-"""),
+        ("system", SYSTEM_PROMPT),
         ("human", "{user_query}")
     ])
     

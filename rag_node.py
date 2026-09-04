@@ -1,4 +1,8 @@
 import os
+
+os.environ["HF_HUB_OFFLINE"] = "1"
+os.environ["TRANSFORMERS_OFFLINE"] = "1"
+
 import pickle
 import numpy as np
 from typing import List
@@ -85,7 +89,7 @@ def rag_node(state: WorkbenchState) -> dict:
     
     # 4. Initialize Cross-Encoder on CPU ONLY to protect VRAM
     print(f"Re-ranking {len(deduped_docs)} chunks via Cross-Encoder (CPU)...")
-    reranker = CrossEncoder('cross-encoder/ms-marco-MiniLM-L-6-v2', device='cpu')
+    reranker = CrossEncoder('./local_cross_encoder', device='cpu', local_files_only=True)
     
     # 5. Create scoring pairs
     user_query_str = state.get("user_query", "")

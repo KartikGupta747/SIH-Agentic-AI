@@ -122,7 +122,7 @@ def vision_node(state: WorkbenchState) -> dict:
 RAW SPATIAL DATA:
 {spatial_text}
 
-Look at the image and the RAW SPATIAL DATA. Format this data into a clean, professional Markdown document (use tables if it's a tabular report, or headers/lists). Rule: DO NOT hallucinate or calculate any numbers. Use ONLY the data provided in the RAW SPATIAL DATA."""
+Look at the image and the RAW SPATIAL DATA. Format this data into a clean, professional Markdown document (use tables if it's a tabular report, or headers/lists). Extract all equipment tags and identifiers (e.g., V-102, C-101, E-101) alongside their equipment descriptions. Rule: DO NOT hallucinate or calculate any numbers. Use ONLY the data provided in the RAW SPATIAL DATA."""
 
         # Construct HumanMessage with text and image
         message = HumanMessage(

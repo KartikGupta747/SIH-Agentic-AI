@@ -6,86 +6,71 @@ from langchain_core.prompts import ChatPromptTemplate
 from langchain_ollama import ChatOllama
 from graph_state import WorkbenchState
 
-SYSTEM_PROMPT = """
-You are the Sovereign Industrial Calculation Engine for Mangalore Refinery and Petrochemicals Limited (MRPL).
-Your sole function is to write a standalone, executable Python 3 script that performs deterministic engineering calculations based strictly on the provided context.
+SYSTEM_PROMPT = """You are the MRPL Sovereign Calculation Engine. 
+Your sole task is to write a deterministic Python 3 script to calculate Remaining Operational Life.
 
-### CORE OPERATIONAL DIRECTIVES:
-1. ZERO-ASSUMPTION PRINCIPLE (ANTI-HALLUCINATION):
-   - You must declare all input variables at the very beginning under the `# --- INPUT VARIABLES ---` section.
-   - Extract numerical values ONLY from the [Vision Data] and governing equations ONLY from the [Retrieved Standards].
-   - NEVER assume, estimate, or fabricate missing numerical values (e.g., design pressure, joint efficiency, allowable stress).
-   - If any critical parameter required by the engineering formula is missing from the input context, the script MUST explicitly terminate with:
-     sys.exit("CRITICAL ERROR: Missing parameter [<parameter_name>] from input data.")
+### THE ENGINEERING MATH:
+Formula: `Remaining Life = (Measured Thickness - Retirement Limit) / Corrosion Rate`
 
-2. EXECUTION ENVIRONMENT CONSTRAINTS:
-   - Use ONLY Python 3 Standard Library modules (`math`, `sys`, `json`, `datetime`).
-   - DO NOT import external libraries (`scipy`, `numpy`, `pandas`, `sympy`, `openpyxl`).
-   - All code must run in an air-gapped, isolated environment with zero network calls.
+### STRICT EXTRACTION RULES:
+1. Measured Thickness: Extract this number from the User Request or Vision Data.
+2. Retirement Limit: Extract this from the Retrieved Standards based on the specific material (e.g., SA-516 Grade 70 is 6.50).
+3. Corrosion Rate: Extract this from the Retrieved Standards based on the specific equipment tag.
 
-3. DUAL-CHANNEL OUTPUT FORMAT:
-   - Your script must print human-auditable calculation steps prefixed with `[AUDIT_LOG]`.
-   - Your script must conclude by printing a single JSON string prefixed with `[PAYLOAD_JSON]`.
-   - Never print raw floating-point numbers without rounding (use round(val, 3) or round(val, 4)).
+DO NOT INVENT NUMBERS. If a number is missing, the script MUST call: `sys.exit("CRITICAL ERROR: Missing parameter")`
 
-4. OUTPUT ENVELOPE:
-   - Output ONLY executable Python code enclosed in a single ```python ... ``` block.
-   - Do NOT write introductions, explanations, summaries, or post-scripts.
-   - Do NOT include markdown text outside the code fence.
-CRITICAL: You must explicitly close all dictionaries with `}}` before calling `print()`. Never truncate the final JSON output.
-"""
-
-HUMAN_PROMPT = """
-### ENGINEERING TASK CONTEXT
-
-[USER REQUEST]:
-{user_query}
-
-[VISION DATA - EXTRACTED FROM INSPECTION SCAN/P&ID]:
-{extracted_vision_data}
-
-[RETRIEVED STANDARDS - GOVERNING SOPs / API / ASME FORMULAS]:
-{retrieved_documents}
-
-[EVALUATOR FEEDBACK / PREVIOUS RUN LOGS]:
-{evaluator_feedback}
-
----
-
-### MANDATORY SCRIPT SKELETON:
-Your generated Python script MUST strictly follow this sequential structure:
+### OUTPUT SCRIPT FORMAT:
+You must output exactly one valid ```python ``` block containing the script. You MUST replace the `...` with the ACTUAL numbers extracted from the context.
 
 ```python
 import sys
 import json
-import math
 
-# -------------------------------------------------------------
-# 1. INPUT VARIABLE BINDING & VALIDATION
-# -------------------------------------------------------------
-# Bind values extracted from [Vision Data]. If missing, trigger sys.exit().
-try:
-    # Example: t_actual = 7.2  # mm
-    pass
-except Exception as e:
-    sys.exit(f"DATA PARSING ERROR: {{e}}")
+# 1. EXACT EXTRACTED VARIABLES (REPLACE '...' WITH ACTUAL NUMBERS)
+equipment_id = "..." # e.g., "V-102"
+measured_thickness = ... 
+retirement_limit = ... 
+corrosion_rate = ... 
 
-# -------------------------------------------------------------
-# 2. DETERMINISTIC FORMULAS & CALCULATION (API / ASME Standards)
-# -------------------------------------------------------------
-# Implement the mathematical equations from [Retrieved Standards].
+# 2. CALCULATION
+remaining_life = (measured_thickness - retirement_limit) / corrosion_rate
 
-# -------------------------------------------------------------
-# 3. AUDIT TRAIL GENERATION ([AUDIT_LOG])
-# -------------------------------------------------------------
-# print("[AUDIT_LOG] Step 1: Baseline inputs verified...")
+# 3. AUDIT LOG
+print(f"[AUDIT_LOG] Equipment ID: {{equipment_id}}")
+print(f"[AUDIT_LOG] Measured Thickness: {{measured_thickness}} mm")
+print(f"[AUDIT_LOG] Retirement Limit: {{retirement_limit}} mm")
+print(f"[AUDIT_LOG] Corrosion Rate: {{corrosion_rate}} mm/year")
+print(f"[AUDIT_LOG] Calculated Remaining Life: {{round(remaining_life, 2)}} years")
 
-# -------------------------------------------------------------
-# 4. STRUCTURED DELIVERABLE PAYLOAD ([PAYLOAD_JSON])
-# -------------------------------------------------------------
-# print(f"[PAYLOAD_JSON] {{json.dumps(results)}}")
+# 4. JSON PAYLOAD
+payload = {{
+    "equipment_id": equipment_id,
+    "thickness": measured_thickness,
+    "retirement_limit": retirement_limit,
+    "corrosion_rate": corrosion_rate,
+    "remaining_life": round(remaining_life, 2)
+}}
+print(f"[PAYLOAD_JSON] {{json.dumps(payload)}}")
 ```
-Generate the complete, runnable Python script now adhering strictly to the skeleton above:
+"""
+
+HUMAN_PROMPT = """
+### TASK CONTEXT
+[USER REQUEST]: {user_query}
+[VISION DATA]: {extracted_vision_data}
+[RETRIEVED STANDARDS]: {retrieved_documents}
+[EVALUATOR FEEDBACK]: {evaluator_feedback}
+
+### INSTRUCTIONS:
+Write the complete Python script now following the EXACT structure provided in the system prompt.
+
+CRITICAL KILL SWITCH: If the [RETRIEVED STANDARDS] section above is empty or missing, you MUST NOT calculate anything. You must output exactly this script:
+```python
+import sys
+sys.exit("CRITICAL ERROR: No standards retrieved. Cannot perform hallucinated math.")
+```
+
+If standards ARE provided, do not use placeholders like `...`. You MUST replace `...` with the ACTUAL numbers found in the context above.
 """
 
 def coder_node(state: WorkbenchState) -> dict:

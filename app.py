@@ -94,7 +94,35 @@ if st.button("▶ Run Sovereign Workbench", type="primary"):
 
         if final_state:
             st.divider()
-            st.subheader("Execution Results")
+            st.subheader("Execution Results & Diagnostics")
+            
+            # --- INJECTED DIAGNOSTICS TABS ---
+            st.markdown("#### 🔍 Sub-Agent Diagnostics")
+            tab_sup, tab_vis, tab_rag, tab_code = st.tabs(["Supervisor", "Vision Node", "RAG Node", "Coder Node"])
+            
+            with tab_sup:
+                st.markdown("**Active Plan (Routing):**")
+                st.json(final_state.get("active_plan", []))
+                
+            with tab_vis:
+                st.markdown("**Extracted Vision Data:**")
+                st.text(final_state.get("extracted_vision_data", "No vision data extracted."))
+                
+            with tab_rag:
+                st.markdown("**Retrieved Documents:**")
+                # Using expander because RAG text can be very long
+                with st.expander("View Raw Retrieved Chunks", expanded=True):
+                    st.text(final_state.get("retrieved_documents", "No documents retrieved."))
+                    
+            with tab_code:
+                st.markdown("**Generated Python Code:**")
+                st.code(final_state.get("sandbox_code", "No code generated."), language="python")
+                st.markdown("**Sandbox Execution Logs:**")
+                st.text(final_state.get("execution_logs", "No logs available."))
+            # ---------------------------------
+            
+            st.divider()
+            st.markdown("#### 🚀 Final Outputs")
             
             # Display Structured Payload
             payload = final_state.get("payload_json", {})
