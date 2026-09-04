@@ -1,0 +1,21 @@
+# Python cache files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual Environment
+venv/
+
+# Project-specific data and indices
+index_data/
+
+# Temporary sandbox execution files
+sandbox_temp.py
+
+# Generated output deliverables
+*.docx
+final_approval_note.docx
+
+# OS generated files (Optional but recommended)
+.DS_Store
+Thumbs.db
