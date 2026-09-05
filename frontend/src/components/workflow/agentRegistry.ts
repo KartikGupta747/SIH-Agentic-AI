@@ -19,6 +19,12 @@ export const AGENTS: Record<string, any> = {
         description: "Retrieving local technical standards",
         icon: FileText
     },
+    approval_analysis: {
+        id: 'approval_analysis',
+        label: "Policy & Governance",
+        description: "Verifying compliance and approvals",
+        icon: FileText
+    },
     coder: {
         id: 'coder',
         label: "Calculation Engine",

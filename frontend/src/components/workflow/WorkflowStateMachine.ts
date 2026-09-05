@@ -103,7 +103,7 @@ export function useWorkflowStateMachine() {
         }
     }, [addTrace]);
 
-    const startExecution = useCallback(async (query: string, file: File) => {
+    const startExecution = useCallback(async (query: string, file: File | null) => {
         reset();
         setState('initializing');
         addTrace('Submitting request...');

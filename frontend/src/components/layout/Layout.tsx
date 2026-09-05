@@ -1,14 +1,13 @@
 import { Outlet, NavLink } from 'react-router-dom';
-import { ShieldAlert, Activity, Cpu, FileBox, Hexagon, BarChart3, Database } from 'lucide-react';
+import { ShieldAlert, Activity, Cpu, Hexagon, BarChart3 } from 'lucide-react';
 import { cn } from '../../lib/utils';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { getSystemStatus } from '../../api/client';
 
 export default function Layout() {
-  const [status, setStatus] = useState<any>(null);
-
   useEffect(() => {
-    getSystemStatus().then(setStatus).catch(console.error);
+    // Optionally fetch system status in background to warm up API
+    getSystemStatus().catch(console.error);
   }, []);
 
   return (
@@ -24,22 +23,11 @@ export default function Layout() {
         </div>
 
         <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
-          <NavItem to="/" icon={<Activity size={18} />} label="Dashboard" />
           <NavItem to="/analysis" icon={<BarChart3 size={18} />} label="New Analysis" />
-          <NavItem to="/knowledge" icon={<Database size={18} />} label="Knowledge Base" />
+          <NavItem to="/runs" icon={<Activity size={18} />} label="Runs" />
+          <NavItem to="/system" icon={<Cpu size={18} />} label="System" />
+          <NavItem to="/security" icon={<ShieldAlert size={18} />} label="Security" />
         </nav>
-
-        <div className="p-4 border-t border-slate-800 text-xs">
-          <div className="flex items-center gap-2 mb-2 text-success font-semibold tracking-wide">
-            <ShieldAlert size={14} /> AIR-GAPPED
-          </div>
-          <div className="flex items-center gap-2 mb-2 text-gray-400">
-            <Cpu size={14} /> GPU: {status?.vram?.raw || "Loading..."}
-          </div>
-          <div className="flex items-center gap-2 text-gray-400">
-            <FileBox size={14} /> K-Base: {status?.knowledge_base || "Loading..."}
-          </div>
-        </div>
       </aside>
 
       {/* Main Content */}

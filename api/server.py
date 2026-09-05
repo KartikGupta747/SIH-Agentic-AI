@@ -37,17 +37,18 @@ def health_check():
 
 @app.post("/api/workflow/run")
 async def create_workflow_run(
-    image: UploadFile = File(...),
-    user_query: str = Form(...)
+    user_query: str = Form(...),
+    image: UploadFile | None = None
 ):
     run_id = str(uuid.uuid4())
-    temp_image_path = f"temp_{run_id}_{image.filename}"
+    temp_image_path = ""
     
-    project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
-    full_temp_path = os.path.join(project_root, temp_image_path)
-    
-    with open(full_temp_path, "wb") as buffer:
-        shutil.copyfileobj(image.file, buffer)
+    if image is not None and getattr(image, "filename", None):
+        temp_image_path = f"temp_{run_id}_{image.filename}"
+        project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+        full_temp_path = os.path.join(project_root, temp_image_path)
+        with open(full_temp_path, "wb") as buffer:
+            shutil.copyfileobj(image.file, buffer)
         
     initial_state = {
         "user_query": user_query,
@@ -61,7 +62,13 @@ async def create_workflow_run(
         "retry_count": 0,
         "final_deliverable_path": "",
         "audit_log": "",
-        "payload_json": {}
+        "payload_json": {},
+        "task_type": "",
+        "plan_metadata": {},
+        "analysis_result": {},
+        "approval_verification": {},
+        "evidence": [],
+        "final_response": ""
     }
     
     RUN_JOBS[run_id] = {
@@ -98,7 +105,7 @@ async def stream_workflow(run_id: str):
                     name = event["name"]
                     tags = event.get("tags") or []
                     
-                    if "graph:step" in str(tags) or name in ["supervisor", "vision", "rag", "coder", "evaluator", "deliverable"]:
+                    if "graph:step" in str(tags) or name in ["supervisor", "vision", "rag", "coder", "approval_analysis", "evaluator", "deliverable"]:
                         if event_type == "on_chain_start":
                             yield f"data: {json.dumps({'type': 'agent_started', 'run_id': run_id, 'agent': name, 'timestamp': time.time()})}\n\n"
                             

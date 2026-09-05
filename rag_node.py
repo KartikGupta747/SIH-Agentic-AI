@@ -26,16 +26,28 @@ def generate_search_queries(state: WorkbenchState) -> list[str]:
     structured_llm = llm.with_structured_output(SearchPlan)
     
     prompt = ChatPromptTemplate.from_messages([
-        ("system", "You are an expert engineering assistant. Generate exactly 3 targeted search queries to find the most relevant information in the technical manuals. Consider both the user query and any extracted vision data (e.g., tables or formulas)."),
+        ("system", """You are an expert retrieval strategist for the MRPL Sovereign AI Workbench.
+Generate exactly 3 targeted search queries to find the most relevant information from the local knowledge base.
+
+Consider the user's intent: {task_type}
+
+- If the task is APPROVAL_VERIFICATION or POLICY_COMPLIANCE, query for:
+  financial delegation authority, procurement approval thresholds, single vendor exception rules, emergency procurement policies, etc.
+- If the task is CALCULATION or ENGINEERING_ANALYSIS, query for:
+  engineering standards (API 510, ASME), specific material constraints, calculation formulas, etc.
+
+Incorporate extracted vision data if present. Output ONLY the 3 queries."""),
         ("human", "User Query: {user_query}\nExtracted Vision Data: {vision_data}")
     ])
     
     chain = prompt | structured_llm
     vision_data = state.get("extracted_vision_data") or "None"
+    task_type = state.get("task_type") or "GENERAL_ANALYSIS"
     
     plan: SearchPlan = chain.invoke({
         "user_query": state.get("user_query", ""),
-        "vision_data": vision_data
+        "vision_data": vision_data,
+        "task_type": task_type
     })
     
     return plan.queries

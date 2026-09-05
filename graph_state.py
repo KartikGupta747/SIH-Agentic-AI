@@ -13,3 +13,11 @@ class WorkbenchState(TypedDict):
     final_deliverable_path: str
     audit_log: str
     payload_json: dict
+    
+    # New generalized fields
+    task_type: str
+    plan_metadata: dict
+    analysis_result: dict
+    approval_verification: dict
+    evidence: list
+    final_response: str

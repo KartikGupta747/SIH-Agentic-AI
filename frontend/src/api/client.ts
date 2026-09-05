@@ -19,10 +19,12 @@ export const runWorkflow = async (userQuery: string, file: File | null) => {
   return data;
 };
 
-export const startWorkflowRun = async (userQuery: string, file: File) => {
+export const startWorkflowRun = async (userQuery: string, file: File | null) => {
   const formData = new FormData();
   formData.append('user_query', userQuery);
-  formData.append('image', file);
+  if (file) {
+    formData.append('image', file);
+  }
 
   const { data } = await apiClient.post('/workflow/run', formData, {
     headers: { 'Content-Type': 'multipart/form-data' },
